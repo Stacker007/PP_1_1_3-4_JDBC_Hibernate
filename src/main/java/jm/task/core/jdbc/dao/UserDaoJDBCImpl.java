@@ -3,19 +3,17 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
     private static final UserDaoJDBCImpl INSTANCE = new UserDaoJDBCImpl();
     public static final String CREATE_TABLE_SQL = """
-            create table user
+            create table IF NOT EXISTS user
             (
-                id        bigint      not null
+                id        bigint      not null AUTO_INCREMENT
                     primary key,
                 name      varchar(32) null,
                 last_name varchar(32) null,
@@ -23,15 +21,21 @@ public class UserDaoJDBCImpl implements UserDao {
             );
             """;
     public static final String DROP_TABLE = """
-            DROP TABLE user_schema.user
+            DROP TABLE IF EXISTS user
             """;
     public static final String DELETE_SQL = """
-            DELETE from user_schema.user
+            DELETE from user
             where id = ?
             """;
     public static final String SAVE_SQL = """
-            INSERT INTO user_schema.user( name, last_name, age) 
-            VALUES (?,?,?)
+             INSERT INTO user(name, last_name, age)
+             VALUES (?,?,?)
+            """;
+    private static final String GET_ALL_SQL = """
+            SELECT * from user
+            """;
+    private static final String CLEAN_TABLE_SQL = """
+            TRUNCATE TABLE user
             """;
 
     public UserDaoJDBCImpl() {
@@ -88,10 +92,35 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public List<User> getAllUsers() {
-        return null;
+        try (Connection connection = Util.open();
+             Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(GET_ALL_SQL);
+            List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setLastName(resultSet.getString("last_name"));
+                user.setAge(resultSet.getByte("age"));
+                users.add(user);
+
+            }
+
+            return users;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void cleanUsersTable() {
 
+        try (Connection connection = Util.open();
+             Statement statement = connection.createStatement()) {
+            statement.execute(CLEAN_TABLE_SQL);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
