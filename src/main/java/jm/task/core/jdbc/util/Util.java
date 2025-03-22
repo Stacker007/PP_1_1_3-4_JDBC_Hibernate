@@ -34,10 +34,10 @@ public final class Util {
             );
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
+        return null;
     }
 
-    // реализуйте настройку соеденения с БД
 }
