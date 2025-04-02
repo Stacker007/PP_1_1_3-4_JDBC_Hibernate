@@ -12,11 +12,7 @@ import org.hibernate.cfg.Configuration;
 
 public class Main {
     public static void main(String[] args) {
-        Configuration configuration = new Configuration();
-        configuration.configure();
-        try (SessionFactory sessionFactory = configuration.buildSessionFactory();
-             Session session = sessionFactory.openSession()) {
-            UserService userService = new UserServiceImpl(session);
+            UserService userService = new UserServiceImpl();
 
             userService.createUsersTable();
 
@@ -41,9 +37,6 @@ public class Main {
             userService.cleanUsersTable();
 
             userService.dropUsersTable();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
 
     }

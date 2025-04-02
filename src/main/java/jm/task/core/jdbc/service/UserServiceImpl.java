@@ -11,8 +11,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final Session session;
-    private final UserDao userDao = new UserDaoHibernateImpl(session);
+    private final UserDao userDao = new UserDaoHibernateImpl();
 
 
     public void createUsersTable() {

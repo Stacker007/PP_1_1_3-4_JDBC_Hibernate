@@ -4,14 +4,27 @@ import jm.task.core.jdbc.model.User;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class UserDaoHibernateImpl implements UserDao {
 
+    private Configuration config;
+    private SessionFactory sessionFactory;
+    private Session session;
 
-    private final Session session;
+    public UserDaoHibernateImpl() {
+        this.config = new Configuration();
+        config.addAnnotatedClass(User.class);
+        config.configure();
+        this.sessionFactory = config.buildSessionFactory();
+        this.session = sessionFactory.openSession();
+    }
+
+
     private static final String CLEAN_TABLE_SQL = """
             TRUNCATE TABLE user
             """;
@@ -30,17 +43,20 @@ public class UserDaoHibernateImpl implements UserDao {
             """;
 
 
-
     @Override
     public void createUsersTable() {
+        session.beginTransaction();
         session.createSQLQuery(CREATE_TABLE_SQL).executeUpdate();
+        session.getTransaction().commit();
 
 
     }
 
     @Override
     public void dropUsersTable() {
+        session.beginTransaction();
         session.createSQLQuery(DROP_TABLE).executeUpdate();
+        session.getTransaction().commit();
 
 
     }
@@ -53,10 +69,12 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
+        session.beginTransaction();
         session.delete(
                 session.get(User.class, id)
         );
         session.flush();
+        session.getTransaction().commit();
 
     }
 
@@ -66,9 +84,12 @@ public class UserDaoHibernateImpl implements UserDao {
         return session.createQuery("from User").list();
     }
 
+    //    @Transactional(Transactional.TxType.REQUIRED)
     @Override
     public void cleanUsersTable() {
+        session.beginTransaction();
         session.createSQLQuery(CLEAN_TABLE_SQL).executeUpdate();
+        session.getTransaction().commit();
 
     }
 }
