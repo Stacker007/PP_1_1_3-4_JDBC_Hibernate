@@ -3,6 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -46,8 +47,13 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void createUsersTable() {
         session.beginTransaction();
-        session.createSQLQuery(CREATE_TABLE_SQL).executeUpdate();
-        session.getTransaction().commit();
+        try {
+            session.createSQLQuery(CREATE_TABLE_SQL).executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            System.out.println("Create table failed");
+        }
 
 
     }
@@ -55,8 +61,13 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void dropUsersTable() {
         session.beginTransaction();
-        session.createSQLQuery(DROP_TABLE).executeUpdate();
-        session.getTransaction().commit();
+        try {
+            session.createSQLQuery(DROP_TABLE).executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            System.out.println("Drop table failed");
+        }
 
 
     }
@@ -70,11 +81,16 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void removeUserById(long id) {
         session.beginTransaction();
-        session.delete(
-                session.get(User.class, id)
-        );
-        session.flush();
-        session.getTransaction().commit();
+        try {
+            session.delete(
+                    session.get(User.class, id)
+            );
+            session.flush();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            System.out.println("Remove User by ID failed");
+        }
 
     }
 
@@ -84,12 +100,16 @@ public class UserDaoHibernateImpl implements UserDao {
         return session.createQuery("from User").list();
     }
 
-    //    @Transactional(Transactional.TxType.REQUIRED)
     @Override
     public void cleanUsersTable() {
         session.beginTransaction();
-        session.createSQLQuery(CLEAN_TABLE_SQL).executeUpdate();
-        session.getTransaction().commit();
+        try {
+            session.createSQLQuery(CLEAN_TABLE_SQL).executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            System.out.println("Clean User Table error");
+        }
 
     }
 }
