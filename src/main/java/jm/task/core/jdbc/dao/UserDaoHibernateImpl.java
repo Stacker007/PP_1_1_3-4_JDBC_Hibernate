@@ -1,14 +1,11 @@
 package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -51,8 +48,10 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(CREATE_TABLE_SQL).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
-            System.out.println("Create table failed");
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+                System.out.println("Create table failed");
+            }
         }
 
 
@@ -65,8 +64,11 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(DROP_TABLE).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
-            System.out.println("Drop table failed");
+            if (session.getTransaction().isActive()) {
+
+                session.getTransaction().rollback();
+                System.out.println("Drop table failed");
+            }
         }
 
 
@@ -88,8 +90,11 @@ public class UserDaoHibernateImpl implements UserDao {
             session.flush();
             session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            System.out.println("Remove User by ID failed");
+            if (session.getTransaction().isActive()) {
+
+                session.getTransaction().rollback();
+                System.out.println("Remove User by ID failed");
+            }
         }
 
     }
@@ -107,8 +112,10 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(CLEAN_TABLE_SQL).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
-            System.out.println("Clean User Table error");
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+                System.out.println("Clean User Table error");
+            }
         }
 
     }
