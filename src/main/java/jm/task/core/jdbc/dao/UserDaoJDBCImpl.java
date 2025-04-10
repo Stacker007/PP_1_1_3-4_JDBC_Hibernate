@@ -3,13 +3,16 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    private static final UserDaoJDBCImpl INSTANCE = new UserDaoJDBCImpl();
     public static final String CREATE_TABLE_SQL = """
             create table IF NOT EXISTS user
             (
@@ -31,12 +34,14 @@ public class UserDaoJDBCImpl implements UserDao {
              INSERT INTO user(name, last_name, age)
              VALUES (?,?,?)
             """;
+    private static final UserDaoJDBCImpl INSTANCE = new UserDaoJDBCImpl();
     private static final String GET_ALL_SQL = """
             SELECT * from user
             """;
     private static final String CLEAN_TABLE_SQL = """
             TRUNCATE TABLE user
             """;
+
 
     public UserDaoJDBCImpl() {
 
@@ -46,6 +51,7 @@ public class UserDaoJDBCImpl implements UserDao {
         return INSTANCE;
     }
 
+    @Override
     public void createUsersTable() {
         try (Connection connection = Util.open();
              Statement statement = connection.createStatement()) {
@@ -57,6 +63,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
+    @Override
     public void dropUsersTable() {
         try (Connection connection = Util.open();
              Statement statement = connection.createStatement()) {
@@ -68,6 +75,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
+    @Override
     public void saveUser(String name, String lastName, byte age) {
         try (Connection connection = Util.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SQL)) {
@@ -81,6 +89,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
+    @Override
     public void removeUserById(long id) {
         try (Connection connection = Util.open();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
@@ -91,6 +100,7 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
+    @Override
     public List<User> getAllUsers() {
         try (Connection connection = Util.open();
              Statement statement = connection.createStatement()) {
@@ -113,6 +123,7 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
+    @Override
     public void cleanUsersTable() {
 
         try (Connection connection = Util.open();
